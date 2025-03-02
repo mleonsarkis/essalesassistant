@@ -7,7 +7,7 @@ app = FastAPI()
 
 MICROSOFT_APP_ID = os.environ.get("MICROSOFT_APP_ID", "")
 MICROSOFT_APP_PASSWORD = os.environ.get("MICROSOFT_APP_PASSWORD", "")
-
+        
 adapter_settings = BotFrameworkAdapterSettings(app_id=MICROSOFT_APP_ID, app_password=MICROSOFT_APP_PASSWORD)
 adapter = BotFrameworkAdapter(adapter_settings)
 
@@ -34,6 +34,8 @@ async def messages(req: Request) -> Response:
 
 @app.post("/teams")
 async def teams_webhook(request: Request):
+    if not MICROSOFT_APP_ID or not MICROSOFT_APP_PASSWORD:
+        return {"error": "Environment variables not found in Web App"}
     return await messages(request)
 
 if __name__ == "__main__":
