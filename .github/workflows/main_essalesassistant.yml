@@ -78,4 +78,12 @@ jobs:
         with:
           app-name: 'essalesassistant'
           slot-name: 'Production'
-          
+
+      - name: 'Set Azure Web App Startup Command from File'
+        run: |
+          STARTUP_CMD=$(cat startup.txt)
+          az webapp config set --name essalesassistant --resource-group es_solutions --startup-file "$STARTUP_CMD"
+
+      - name: 'Restart Azure Web App'
+        run: |
+          az webapp restart --name essalesassistant --resource-group es_solutions
