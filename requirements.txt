@@ -6,3 +6,4 @@ aiohttp
 azure-cli
 langchain
 langchain-community
+openai
