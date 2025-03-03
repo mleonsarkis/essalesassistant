@@ -9,12 +9,12 @@ from langchain.prompts import PromptTemplate
 
 MICROSOFT_APP_ID = os.environ.get("MICROSOFT_APP_ID", "")
 MICROSOFT_APP_PASSWORD = os.environ.get("MICROSOFT_APP_PASSWORD", "")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 app = FastAPI()
 
 # Initialize OpenAI GPT-4 Model via LangChain
-llm = ChatOpenAI(model_name="gpt-4", openai_api_key=OPENAI_API_KEY, temperature=0.7)
+llm = ChatOpenAI(model_name="gpt-4o", openai_api_key=OPENAI_API_KEY, temperature=0.7)
 
 # Define Prompt Templates
 intent_prompt = PromptTemplate(
@@ -60,6 +60,7 @@ def process_user_query(user_input: str):
 @app.post("/teams")
 async def teams_webhook(request: Request):
     data = await request.json()
+    print(data)
     user_message = data.get("text", "")
 
     if not user_message:
