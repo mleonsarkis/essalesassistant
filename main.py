@@ -7,46 +7,56 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
-app = FastAPI()
-
 MICROSOFT_APP_ID = os.environ.get("MICROSOFT_APP_ID", "")
 MICROSOFT_APP_PASSWORD = os.environ.get("MICROSOFT_APP_PASSWORD", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
-
+# Initialize OpenAI GPT-4 Model via LangChain
 llm = ChatOpenAI(model_name="gpt-4", openai_api_key=OPENAI_API_KEY, temperature=0.7)
 
-# Define Prompt Template for Company Information Retrieval
+# Define Prompt Templates
+intent_prompt = PromptTemplate(
+    input_variables=["user_message"],
+    template="""
+    Classify the user's message intent as one of the following:
+    - "greeting" if they are saying hello.
+    - "company_query" if they are asking about a company's details.
+    - "other" if the message does not fall into the above categories.
+
+    User Message: {user_message}
+    Response (Only return one of the labels: greeting, company_query, or other):
+    """
+)
+
 company_prompt = PromptTemplate(
     input_variables=["company_name"],
     template="Provide a brief company profile for {company_name}, including industry, size, location, revenue, and recent news. If no data is available, say 'No information found.'"
 )
 
+# Create LangChain Chains
+intent_chain = LLMChain(llm=llm, prompt=intent_prompt)
 company_chain = LLMChain(llm=llm, prompt=company_prompt)
 
-
-# Define a Function to Handle User Queries
+# Process User Query Using LLM
 def process_user_query(user_input: str):
     """
-    Determines if the query is related to company information.
-    If yes, fetches data using LangChain & OpenAI GPT-4.
-    Otherwise, returns a default response.
+    Uses LLM to determine intent and respond appropriately.
+    - Greeting → Respond with a friendly message.
+    - Company Query → Fetch company information.
+    - Other → Return a default response.
     """
-    keywords = ["company", "business", "organization", "firm", "corporation", "enterprise"]
+    intent = intent_chain.run(user_input).strip().lower()
 
-    if any(keyword in user_input.lower() for keyword in keywords):
-        # Extract company name (assumes last word is the company name)
-        company_name = user_input.split()[-1]
-        response = company_chain.run(company_name)
+    if intent == "greeting":
+        return "Hello! How can I assist you with company information today?"
+    elif intent == "company_query":
+        return company_chain.run(user_input)
     else:
-        response = "Sorry, I'm just a sales assistant and not trained to answer that."
+        return "Sorry, I'm just a sales assistant and not trained to answer that."
 
-    return response
-
-
-# Microsoft Teams Endpoint
+# Microsoft Teams Webhook
 @app.post("/teams")
 async def teams_webhook(request: Request):
     data = await request.json()
@@ -57,7 +67,6 @@ async def teams_webhook(request: Request):
 
     bot_response = process_user_query(user_message)
     return {"message": bot_response}
-
 
 # Health Check Endpoint
 @app.get("/")
