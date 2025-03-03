@@ -60,13 +60,12 @@ def process_user_query(user_input: str):
 @app.post("/teams")
 async def teams_webhook(request: Request):
     data = await request.json()
-    print(data)
     user_message = data.get("text", "")
 
     if not user_message:
         return {"message": "No user input received."}
 
-    bot_response = "Helloo"#process_user_query(user_message)
+    bot_response = data #process_user_query(user_message)
     return {"message": bot_response}
 
 # Health Check Endpoint
