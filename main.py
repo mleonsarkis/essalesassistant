@@ -56,6 +56,12 @@ def process_user_query(user_input: str):
     else:
         return "Sorry, I'm just a sales assistant and not trained to answer that."
 
+@app.middleware("http")
+async def add_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["Connection"] = "keep-alive"
+    return response
+    
 # Microsoft Teams Webhook
 @app.post("/teams")
 async def teams_webhook(request: Request):
