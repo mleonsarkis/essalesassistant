@@ -14,7 +14,7 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 app = FastAPI()
 
 # Initialize OpenAI GPT-4 Model via LangChain
-llm = ChatOpenAI(model_name="gpt-4o", openai_api_key=OPENAI_API_KEY, temperature=0.7)
+llm = ChatOpenAI(model_name="gpt-4", openai_api_key=OPENAI_API_KEY, temperature=0.7)
 
 # Define Prompt Templates
 intent_prompt = PromptTemplate(
@@ -65,7 +65,7 @@ async def teams_webhook(request: Request):
     if not user_message:
         return {"message": "No user input received."}
 
-    bot_response = data #process_user_query(user_message)
+    bot_response = process_user_query(user_message)
     return {"message": bot_response}
 
 # Health Check Endpoint
