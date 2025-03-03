@@ -5,3 +5,4 @@ botbuilder-schema
 aiohttp 
 azure-cli
 langchain
+langchain-community
