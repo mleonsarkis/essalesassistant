@@ -66,7 +66,7 @@ async def teams_webhook(request: Request):
     if not user_message:
         return {"message": "No user input received."}
 
-    bot_response = process_user_query(user_message)
+    bot_response = "Helloo"#process_user_query(user_message)
     return {"message": bot_response}
 
 # Health Check Endpoint
