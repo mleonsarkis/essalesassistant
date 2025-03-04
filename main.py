@@ -16,6 +16,12 @@ app = FastAPI()
 # Initialize OpenAI GPT-4 Model via LangChain
 llm = ChatOpenAI(model_name="gpt-4", openai_api_key=OPENAI_API_KEY, temperature=0.7)
 
+adapter_settings = BotFrameworkAdapterSettings(
+    app_id=MICROSOFT_APP_ID,
+    app_password=MICROSOFT_APP_PASSWORD
+)
+adapter = BotFrameworkAdapter(adapter_settings)
+
 # Define Prompt Templates
 intent_prompt = PromptTemplate(
     input_variables=["user_message"],
@@ -39,42 +45,33 @@ company_prompt = PromptTemplate(
 intent_chain = LLMChain(llm=llm, prompt=intent_prompt)
 company_chain = LLMChain(llm=llm, prompt=company_prompt)
 
-# Process User Query Using LLM
-def process_user_query(user_input: str):
-    """
-    Uses LLM to determine intent and respond appropriately.
-    - Greeting → Respond with a friendly message.
-    - Company Query → Fetch company information.
-    - Other → Return a default response.
-    """
+# Process User Query Using LLM and Respond via Bot Framework
+async def process_user_query(turn_context: TurnContext):
+    user_input = turn_context.activity.text
     intent = intent_chain.run(user_input).strip().lower()
 
     if intent == "greeting":
-        return "Hello! How can I assist you with company information today?"
+        bot_response = "Hello! How can I assist you with today?"
     elif intent == "company_query":
-        return company_chain.run(user_input)
+        bot_response = company_chain.run(user_input)
     else:
-        return "Sorry, I'm just a sales assistant and not trained to answer that."
+        bot_response = "Sorry, I'm just a sales assistant and not trained to answer that"
 
-@app.middleware("http")
-async def add_headers(request, call_next):
-    response = await call_next(request)
-    response.headers["Connection"] = "keep-alive"
-    return response
+    await turn_context.send_activity(bot_response)
     
-# Microsoft Teams Webhook
 @app.post("/teams")
 async def teams_webhook(request: Request):
-    data = await request.json()
-    user_message = data.get("text", "")
+    body = await request.json()
+    activity = Activity().deserialize(body)
 
-    if not user_message:
-        return {"message": "No user input received."}
+    async def aux_func(turn_context: TurnContext):
+        await process_user_query(turn_context)
 
-    bot_response = "Fast answer hello"#process_user_query(user_message)
-    return {"message": bot_response}
+    auth_header = request.headers.get("Authorization", "")
+    await adapter.process_activity(activity, auth_header, aux_func)
 
-# Health Check Endpoint
+    return Response(status_code=201)
+
 @app.get("/")
 def health_check():
     return {"message": "Sales Assistant Bot is running!"}
