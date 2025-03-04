@@ -1,0 +1,18 @@
+[
+    {
+        "company_name": "Google",
+        "worked_with": "2021-2023",
+        "project_details": "AI Research Collaboration",
+        "resources_used": ["GPT-4", "TensorFlow", "Kubernetes"],
+        "skills_required": ["Machine Learning", "Cloud Computing"],
+        "contacts": ["Alice Johnson", "Bob Smith"]
+    },
+    {
+        "company_name": "Tesla",
+        "worked_with": "2019-2022",
+        "project_details": "Autonomous Vehicle Development",
+        "resources_used": ["Deep Learning Models", "Sensor Fusion"],
+        "skills_required": ["Python", "Computer Vision"],
+        "contacts": ["Elon Musk", "John Doe"]
+    }
+]
