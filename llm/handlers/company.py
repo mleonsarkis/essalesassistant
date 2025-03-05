@@ -1,4 +1,3 @@
-import logging
 import json
 from langchain_openai import ChatOpenAI
 from langchain.chains import LLMChain
@@ -7,17 +6,13 @@ from data.memory import memory
 from utils.loader import load_json
 from config.settings import OPENAI_API_KEY
 
-# Configure logging for debugging.
-logging.basicConfig(level=logging.INFO)
-
 # Load known companies.
 known_companies = load_json("data/known_companies.json")
-logging.info(f"Loaded known companies: {known_companies}")
 
 # Initialize the LLM.
 llm = ChatOpenAI(model_name="gpt-4", openai_api_key=OPENAI_API_KEY, temperature=0.7)
 
-# Prompt to extract a company name and determine if the user's query is about that company.
+# Extraction prompt: extract company name and determine if the query is about that company.
 extraction_prompt = PromptTemplate(
     input_variables=["user_input"],
     template="""
@@ -32,10 +27,9 @@ User Input: {user_input}
 Output JSON:"""
 )
 
-# Create a chain for extracting the company name and query flag.
 extraction_chain = LLMChain(llm=llm, prompt=extraction_prompt)
 
-# Prompt for generating an extensive company profile.
+# Profile prompt: generate an extensive company profile.
 profile_prompt = PromptTemplate(
     input_variables=["company_name"],
     template="""
@@ -50,7 +44,6 @@ Output the profile in a structured format.
 """
 )
 
-# Create a chain for generating the company profile.
 profile_chain = LLMChain(llm=llm, prompt=profile_prompt)
 
 class CompanyHandler:
@@ -59,23 +52,26 @@ class CompanyHandler:
         self.profile_chain = profile_chain
 
     async def handle(self, user_input: str) -> str:
-        # Use the LLM to extract the company name and whether the query is about the company.
+        # Use the LLM to extract company details.
         extraction_result = await self.extraction_chain.arun(user_input=user_input)
-        logging.info(f"Extraction result: {extraction_result}")
-
+    
+        
+        # Fallback if nothing is returned.
+        if not extraction_result or extraction_result.strip() == "":
+            return "I'm sorry, I couldn't extract a company name from your input. Could you please rephrase?"
+        
         try:
             result_json = json.loads(extraction_result)
-        except json.JSONDecodeError:
-            return "I'm sorry, I couldn't extract the company name. Please rephrase your query."
+        except json.JSONDecodeError as e:
+
+            return "I'm sorry, I couldn't extract the company name properly. Please rephrase your query."
 
         candidate = result_json.get("company_name", "").strip().lower()
         is_query = result_json.get("is_company_query", False)
 
-        # If the LLM doesn't think the user is asking about a company, ask for clarification.
+        # If the LLM doesn't consider it a company query or no valid company is extracted, ask for clarification.
         if not is_query or candidate == "none" or not candidate:
-            return "It doesn't seem that you're asking about a company's profile. Could you please specify which company you'd like details for?"
-
-        logging.info(f"Extracted candidate company: '{candidate}'")
+            return "It doesn't seem like you're asking for a company's profile. Could you please specify which company you'd like details for?"
 
         # Check if the candidate exists in known companies.
         known_company = next(
@@ -89,8 +85,8 @@ class CompanyHandler:
                 f"Contacts: {', '.join(known_company['contacts'])}."
             )
         else:
-            # Save/update memory with the candidate.
+            # Save/update the current company in memory.
             memory.save_context({"user_message": user_input}, {"current_company": candidate})
-            # Generate an extensive profile using the LLM.
+            # Generate an extensive company profile using the LLM.
             profile = await self.profile_chain.arun(company_name=candidate)
             return profile
