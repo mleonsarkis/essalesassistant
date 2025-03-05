@@ -15,6 +15,7 @@ Possible intents:
 - thanks
 - company_query
 - opportunity_creation
+- proposal_draft
 
 If none of the above apply, return "unknown".
 
