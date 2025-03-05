@@ -38,7 +38,6 @@ Output JSON:
 }}
 """
 )
-)
 
 # Prompt for company information (used only when a company query is detected)
 company_prompt = PromptTemplate(
