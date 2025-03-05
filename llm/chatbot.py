@@ -19,6 +19,6 @@ async def process_user_query(user_input: str) -> str:
     elif intent == "opportunity_creation":
         return await opportunity_handler.handle(user_input)
     elif intent == "company_query":
-        return await company_handler.handle(user_input)
+        return "It's a company query"#await company_handler.handle(user_input)
     else:
         return "Sorry, I'm just a sales assistant and not trained to answer that."
