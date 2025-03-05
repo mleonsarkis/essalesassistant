@@ -7,20 +7,18 @@ import asyncio
 router = APIRouter()
 bot = MyBot()
 
+
 @router.post("/teams")
 async def teams_webhook(request: Request):
     if "application/json" in request.headers["Content-Type"]:
-        body = request.json
+        body = await request.json()
     else:
-        return Response(status=415)
+        return Response(status_code=415)
 
     activity = Activity().deserialize(body)
     auth_header = request.headers.get("Authorization", "")
 
-    async def call_bot():
-        await adapter.process_activity(activity, auth_header, bot.on_turn)
+    # Directly await the process_activity call without creating a new loop.
+    await adapter.process_activity(activity, auth_header, bot.on_turn)
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(call_bot())
-    return Response(status=201)
+    return Response(status_code=201)
