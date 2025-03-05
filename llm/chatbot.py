@@ -4,14 +4,12 @@ from handlers.opportunity_handler import OpportunityHandler
 from handlers.company_handler import CompanyHandler
 from handlers.proposal_handler import ProposalHandler
 
-# Instantiate handler classes.
 intent_classifier = IntentClassifier()
 opportunity_handler = OpportunityHandler()
 company_handler = CompanyHandler()
 proposal_handler = ProposalHandler()
 
-async def process_user_query(user_input: str):
-    # Classify the intent.
+async def process_user_query(user_input: str) -> str:
     intent = await intent_classifier.classify(user_input)
     if intent == "greeting":
         return "Hello! How can I assist you today?"
