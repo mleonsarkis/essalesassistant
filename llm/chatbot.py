@@ -28,15 +28,16 @@ Return a valid JSON object with these keys.
 If any detail is missing, set its value as an empty string and include that field in a "missing_fields" list.
 User Message: {user_message}
 Output JSON: 
-{
+{{
   "contact_name": "<value or empty>",
   "company_name": "<value or empty>",
   "deal_stage": "<value or empty>",
   "amount": "<value or empty>",
   "close_date": "<value or empty>",
   "missing_fields": ["<list any missing field names>"]
-}
+}}
 """
+)
 )
 
 # Prompt for company information (used only when a company query is detected)
@@ -122,30 +123,46 @@ async def process_user_query(user_input: str):
     elif intent == "opportunity_creation":
         return await process_opportunity(user_input)
     elif intent == "company_query":
-        # Check if a previous company query exists in conversation history
-        chat_history = memory.chat_memory.messages
-        previous_company = None
-        for msg in reversed(chat_history):
-            if "company_query" in msg.content:
-                previous_company = msg.content.split(":")[-1].strip()
-                break
-
-        # Extract company name from the user input if not found in history
-        if not previous_company:
-            # A simple heuristic: assume the last word is the company name.
-            company_name = user_input.split()[-1]
-        else:
-            company_name = previous_company
-
-        # Check against known companies first
-        known_company = next((c for c in known_companies if c["company_name"].lower() == company_name.lower()), None)
-        if known_company:
-            return (
-                f"{company_name} is a known company you worked with in the past. "
-                f"You worked on {known_company['project_details']} from {known_company['worked_with']}. "
-                f"Contacts: {', '.join(known_company['contacts'])}."
-            )
-        else:
-            return await company_chain.arun(company_name=company_name)
+    # Look for known companies mentioned in the user input.
+    matching_companies = []
+    for company in known_companies:
+        if company["company_name"].lower() in user_input.lower():
+            matching_companies.append(company["company_name"])
+    
+    # Remove duplicates.
+    matching_companies = list(set(matching_companies))
+    
+    # Retrieve a previously stored company from memory if available.
+    stored_company = memory.load_memory_variables({}).get("current_company")
+    
+    # Determine which company to use:
+    if len(matching_companies) > 1:
+        # Ambiguous input: More than one company mentioned.
+        return "I detected multiple companies in your message. Could you please specify which one you are referring to?"
+    elif len(matching_companies) == 1:
+        company_name = matching_companies[0]
+    elif stored_company:
+        company_name = stored_company
+    else:
+        # No clear company was provided.
+        return "Please specify the company you are referring to."
+    
+    # Save or update the company name in memory for subsequent queries.
+    memory.save_context({"user_message": user_input}, {"current_company": company_name})
+    
+    # Check if the company is known.
+    known_company = next(
+        (c for c in known_companies if c["company_name"].lower() == company_name.lower()), 
+        None
+    )
+    if known_company:
+        return (
+            f"{company_name} is a known company you worked with in the past. "
+            f"You worked on {known_company['project_details']} from {known_company['worked_with']}. "
+            f"Contacts: {', '.join(known_company['contacts'])}."
+        )
+    else:
+        # Generate a company profile using the company chain.
+        return await company_chain.arun(company_name=company_name)
     else:
         return "Sorry, I'm just a sales assistant and not trained to answer that."
