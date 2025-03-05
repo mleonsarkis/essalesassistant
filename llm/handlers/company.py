@@ -49,11 +49,13 @@ profile_chain = LLMChain(llm=llm, prompt=profile_prompt)
 conversation_memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 conversation_prompt = ChatPromptTemplate(
+    input_variables=["chat_history", "user_input"],
     messages=[
         SystemMessagePromptTemplate.from_template(
-            "You are a helpful sales assistant providing detailed information about companies."
-            " Use the conversation history provided to answer follow-up questions without requiring the company name again."
-            " If the question isn't company-related, respond: 'Sorry, I'm just a sales assistant and not trained to answer that.'"
+            "You are a helpful sales assistant providing detailed information about companies. "
+            "Use the conversation history provided below to answer follow-up questions without requiring the company name again. "
+            "If the question isn't company-related, respond: 'Sorry, I'm just a sales assistant and not trained to answer that.' "
+            "\n\nConversation History:\n{chat_history}"
         ),
         HumanMessagePromptTemplate.from_template("{user_input}"),
     ]
@@ -62,7 +64,8 @@ conversation_prompt = ChatPromptTemplate(
 conversation_chain = ConversationChain(
     llm=llm,
     memory=conversation_memory,
-    prompt=conversation_prompt
+    prompt=conversation_prompt,
+    input_key="user_input"
 )
 
 class CompanyHandler:
