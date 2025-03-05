@@ -106,4 +106,4 @@ class CompanyHandler:
                 return profile
             except Exception as e:
                 logging.error(f"Error during profile generation: {e}")
-                return "I'm sorry, I couldn't generate the company profile. Please try again later."
+                return f"I'm sorry, I couldn't generate the company '{candidate}' profile. Please try again later."
