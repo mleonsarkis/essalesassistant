@@ -72,7 +72,7 @@ class CompanyHandler:
             logging.info(f"Extraction result: {extraction_result}")
         except Exception as e:
             logging.error(f"Error during extraction: {e}")
-            return "I'm sorry, I couldn't process your request. Could you please rephrase your query?"
+            return f"I'm sorry, I couldn't process your request for '{extraction_result}'. Could you please rephrase your query?"
 
         # Attempt to parse the output as JSON.
         try:
