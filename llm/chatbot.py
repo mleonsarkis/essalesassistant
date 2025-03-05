@@ -1,5 +1,5 @@
-from handlers.intent import IntentClassifier
-from handlers.opportunity import OpportunityHandler
+from llm.handlers.intent import IntentClassifier
+from llm.handlers.opportunity import OpportunityHandler
 from llm.handlers.company import CompanyHandler
 
 # Instantiate handler classes.
