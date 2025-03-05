@@ -1,7 +1,6 @@
-import asyncio
-from llm.handlers.intent_handler import IntentClassifier
-from llm.handlers.opportunity_handler import OpportunityHandler
-from llm.handlers.company_handler import CompanyHandler
+from handlers.intent import IntentClassifier
+from handlers.opportunity import OpportunityHandler
+from llm.handlers.company import CompanyHandler
 
 # Instantiate handler classes.
 intent_classifier = IntentClassifier()
