@@ -9,3 +9,4 @@ langchain-community
 langchain-openai
 openai
 python-dotenv
+python-pptx
