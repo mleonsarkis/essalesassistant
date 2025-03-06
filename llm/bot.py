@@ -3,8 +3,13 @@ from botbuilder.core import ActivityHandler, TurnContext, MessageFactory
 from llm.chatbot import process_user_query
 
 class MyBot(ActivityHandler):
-    async def on_message_activity(self, turn_context: TurnContext, session_id=None):
+    async def on_message_activity(self, turn_context: TurnContext):
         user_input = turn_context.activity.text
+        try:
+            session_id = turn_context.activity.get("conversation").get("id","0")
+        except Exception as e:
+            session_id = "0" #No session ID provided by chat
+
         result = await process_user_query(user_input, session_id)
         if isinstance(result, dict):
             message = MessageFactory.text(result.get("text", ""))

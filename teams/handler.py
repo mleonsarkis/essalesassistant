@@ -13,7 +13,6 @@ async def teams_webhook(request: Request):
 
     if "application/json" in request.headers["Content-Type"]:
         body = await request.json()
-        session_id = body.get("conversation", {}).get("id","0")
     else:
         return Response(status_code=415)
 
@@ -21,6 +20,6 @@ async def teams_webhook(request: Request):
     auth_header = request.headers.get("Authorization", "")
 
     # Directly await the process_activity call without creating a new loop.
-    await adapter.process_activity(activity, auth_header, bot.on_turn, session_id=session_id)
+    await adapter.process_activity(activity, auth_header, bot.on_turn)
 
     return Response(status_code=201)
