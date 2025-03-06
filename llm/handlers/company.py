@@ -4,7 +4,6 @@ from langchain_openai import ChatOpenAI
 from langchain.chains import LLMChain, ConversationChain
 from langchain.prompts import PromptTemplate, ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 from langchain.memory import ConversationBufferMemory
-from data.memory import memory
 from utils.loader import load_json
 from config.settings import OPENAI_API_KEY
 

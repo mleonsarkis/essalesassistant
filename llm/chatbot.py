@@ -9,7 +9,7 @@ opportunity_handler = OpportunityHandler()
 company_handler = CompanyHandler()
 proposal_handler = ProposalHandler()
 
-async def process_user_query(user_input: str) -> str:
+async def process_user_query(user_input: str):
     intent = await intent_classifier.classify(user_input)
     if intent == "greeting":
         return "Hello! I'm Jordan, an automated sales assistant. I can help you find information about companies, create opportunities in HubSpot or draft project proposals."
