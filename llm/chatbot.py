@@ -9,7 +9,7 @@ opportunity_handler = OpportunityHandler()
 company_handler = CompanyHandler()
 proposal_handler = ProposalHandler()
 
-async def process_user_query(user_input: str):
+async def process_user_query(user_input: str, session_id="0"):
     intent = await intent_classifier.classify(user_input)
     if intent == "greeting":
         return "Hello! I'm Jordan, an automated sales assistant. I can help you find information about companies, create opportunities in HubSpot or draft project proposals."
@@ -20,14 +20,8 @@ async def process_user_query(user_input: str):
     elif intent == "opportunity_creation":
         return await opportunity_handler.handle(user_input)
     elif intent == "company_query":
-        return await company_handler.handle(user_input)
+        return await company_handler.handle(user_input, session_id)
     elif intent == "proposal_draft":
         return await proposal_handler.handle(user_input)
     else:
         return "Sorry, I'm just a sales assistant and not trained to answer that."
-
-if __name__ == "__main__":
-    import sys
-    user_input = sys.argv[1] if len(sys.argv) > 1 else "Hello"
-    result = asyncio.run(process_user_query(user_input))
-    print(result)

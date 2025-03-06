@@ -1,11 +1,13 @@
 import logging
 import json
+import redis
 from langchain_openai import ChatOpenAI
 from langchain.chains import LLMChain, ConversationChain
 from langchain.prompts import PromptTemplate, ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 from langchain.memory import ConversationBufferMemory
+from langchain.memory.chat_message_histories import RedisChatMessageHistory
 from utils.loader import load_json
-from config.settings import OPENAI_API_KEY
+from config.settings import OPENAI_API_KEY, REDIS_URL
 
 logging.basicConfig(level=logging.INFO)
 
@@ -45,7 +47,13 @@ Output the profile in a structured format.
 )
 profile_chain = LLMChain(llm=llm, prompt=profile_prompt)
 
-conversation_memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+def get_memory(session_id: str):
+    chat_history = RedisChatMessageHistory(url=REDIS_URL, session_id=session_id)
+    return ConversationBufferMemory(
+        memory_key="chat_history",
+        chat_memory=chat_history,
+        return_messages=True
+    )
 
 conversation_prompt = ChatPromptTemplate(
     input_variables=["chat_history", "user_input"],
@@ -60,20 +68,21 @@ conversation_prompt = ChatPromptTemplate(
     ]
 )
 
-conversation_chain = ConversationChain(
-    llm=llm,
-    memory=conversation_memory,
-    prompt=conversation_prompt,
-    input_key="user_input"
-)
-
 class CompanyHandler:
     def __init__(self):
         self.extraction_chain = extraction_chain
         self.profile_chain = profile_chain
-        self.conversation_chain = conversation_chain
 
-    async def handle(self, user_input: str) -> str:
+    async def handle(self, user_input: str, session_id) -> str:
+        conversation_memory = get_memory(session_id)
+
+        conversation_chain = ConversationChain(
+            llm=llm,
+            memory=conversation_memory,
+            prompt=conversation_prompt,
+            input_key="user_input"
+        )
+
         extraction_result = await self.extraction_chain.arun(user_input=user_input)
         logging.info(f"Raw extraction result: {extraction_result}")
 
@@ -108,5 +117,5 @@ class CompanyHandler:
                 profile = await self.profile_chain.arun(company_name=candidate)
                 return profile
         else:
-            response = await self.conversation_chain.arun(user_input=user_input)
+            response = await conversation_chain.arun(user_input=user_input)
             return response
