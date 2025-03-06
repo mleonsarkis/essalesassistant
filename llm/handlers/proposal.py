@@ -6,7 +6,7 @@ from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
 import base64
-from botbuilder.schema import Attachment
+from botbuilder.schema import Attachment, ActivityTypes, Activity
 
 llm = ChatOpenAI(model_name="gpt-4", openai_api_key=OPENAI_API_KEY, temperature=0.7)
 
@@ -81,7 +81,11 @@ class ProposalHandler:
             content=base64_data,
             name="proposal.pptx"
         )
-        return {
-            "text": "Here is your proposal presentation draft attached.",
-            "attachments": [attachment]
-        }
+
+        activity = Activity(
+            type=ActivityTypes.message,
+            text="Here is your proposal presentation draft attached.",
+            attachments=[attachment]
+        )
+
+        return activity
