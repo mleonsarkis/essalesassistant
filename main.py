@@ -16,18 +16,20 @@ def health_check():
 
 
 if __name__ == "__main__":
-    #uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    """
     import asyncio
     async def test_bot():
-        print("🤖 ES Sales Assistant local test. Type 'exit' to quit.\n")
+        print("ES Sales Assistant local test. Type 'exit' to quit.\n")
         while True:
             user_input = input("You: ")
             if user_input.lower() == "exit":
-                print("Goodbye! 👋")
+                print("Goodbye")
                 break
             try:
                 response = await llm.chatbot.process_user_query(user_input)
                 print(f"Bot: {response}\n")
             except Exception as e:
-                print(f"⚠️ Error: {e}\n")
+                print(f"Error: {e}\n")
     asyncio.run(test_bot())
+    """
