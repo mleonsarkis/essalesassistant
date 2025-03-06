@@ -1,12 +1,13 @@
 from langchain_openai import ChatOpenAI
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
-from config.settings import OPENAI_API_KEY
+from config.settings import OPENAI_API_KEY, BLOB_CONNECTION_STR, CONTAINER_NAME
 from pptx import Presentation
 from pptx.util import Inches
 from io import BytesIO
 import base64
 from botbuilder.schema import Attachment, ActivityTypes, Activity
+from azure.storage.blob import BlobServiceClient, ContentSettings
 
 llm = ChatOpenAI(model_name="gpt-4", openai_api_key=OPENAI_API_KEY, temperature=0.7)
 
@@ -69,16 +70,38 @@ def generate_ppt_from_outline(outline: str) -> bytes:
 class ProposalHandler:
     def __init__(self):
         self.chain = LLMChain(llm=llm, prompt=proposal_prompt)
-    
+
+    def upload_file_to_blob(blob_name: str) -> str:
+        blob_service_client = BlobServiceClient.from_connection_string(BLOB_CONNECTION_STR)
+        container_client = blob_service_client.get_container_client(CONTAINER_NAME)
+        blob_name = "proposal.pptx"
+        with open(blob_name, "rb") as data:
+            container_client.upload_blob(
+                name=blob_name,
+                data=data,
+                overwrite=True,
+                content_settings=ContentSettings(
+                    content_type="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                )
+            )
+
+        account_url = blob_service_client.primary_endpoint
+        file_url = f"{account_url}/{CONTAINER_NAME}/{blob_name}"
+        return file_url
+
     async def handle(self, user_input: str) -> dict:
         # Generate the proposal outline using the LLM.
         proposal_text = await self.chain.arun(user_message=user_input)
         # Generate a PowerPoint file from the outline.
         ppt_data = generate_ppt_from_outline(proposal_text)
         base64_data = base64.b64encode(ppt_data).decode('utf-8')
+        name = "proposal.pptx"
+        content_url = self.upload_file_to_blob(name)
+
         attachment = Attachment(
             content_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
             content=base64_data,
+            content_url=content_url,
             name="proposal.pptx"
         )
 
