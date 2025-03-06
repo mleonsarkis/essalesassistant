@@ -1,8 +1,9 @@
-fastapi 
-uvicorn 
+fastapi
+uvicorn
+gunicorn
 botbuilder-core 
 botbuilder-schema 
-aiohttp 
+aiohttp
 azure-cli
 langchain
 langchain-community
