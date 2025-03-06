@@ -1,6 +1,5 @@
 fastapi
-uvicorn
-gunicorn
+hypercorn
 botbuilder-core 
 botbuilder-schema 
 aiohttp
