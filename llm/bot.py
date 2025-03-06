@@ -1,6 +1,6 @@
 import asyncio
 from botbuilder.core import ActivityHandler, TurnContext, MessageFactory
-from chatbot import process_user_query
+from llm.chatbot import process_user_query
 
 class MyBot(ActivityHandler):
     async def on_message_activity(self, turn_context: TurnContext):

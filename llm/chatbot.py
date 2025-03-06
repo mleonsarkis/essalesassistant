@@ -1,8 +1,8 @@
 import asyncio
-from handlers.intent_handler import IntentClassifier
-from handlers.opportunity_handler import OpportunityHandler
-from handlers.company_handler import CompanyHandler
-from handlers.proposal_handler import ProposalHandler
+from llm.handlers.intent import IntentClassifier
+from llm.handlers.opportunity import OpportunityHandler
+from llm.handlers.company import CompanyHandler
+from llm.handlers.proposal import ProposalHandler
 
 intent_classifier = IntentClassifier()
 opportunity_handler = OpportunityHandler()
@@ -12,7 +12,7 @@ proposal_handler = ProposalHandler()
 async def process_user_query(user_input: str) -> str:
     intent = await intent_classifier.classify(user_input)
     if intent == "greeting":
-        return "Hello! How can I assist you today?"
+        return "Hello! I'm Jordan, an automated sales assistant. I can help you find information about companies, create opportunities in HubSpot or draft project proposals."
     elif intent == "goodbye":
         return "Goodbye! Feel free to reach out anytime."
     elif intent == "thanks":
