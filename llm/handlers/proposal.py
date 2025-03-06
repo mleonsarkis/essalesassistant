@@ -55,11 +55,11 @@ def generate_ppt_from_outline(outline: str) -> bytes:
         slide = prs.slides.add_slide(prs.slide_layouts[5])  # Use a blank layout.
         textbox = slide.shapes.add_textbox(Inches(1), Inches(1), Inches(8), Inches(4))
         tf = textbox.text_frame
+        # Clear the default paragraph that is automatically added.
+        tf.text = ""
         for line in slide_text.split("\n"):
             p = tf.add_paragraph()
             p.text = line.strip()
-        if tf.paragraphs and tf.paragraphs[0].text == "":
-            tf.paragraphs.pop(0)
     output = BytesIO()
     prs.save(output)
     ppt_data = output.getvalue()

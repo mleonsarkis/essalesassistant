@@ -8,7 +8,10 @@ class MyBot(ActivityHandler):
         try:
             session_id = turn_context.activity.get("conversation").get("id","0")
         except Exception as e:
-            session_id = "0" #No session ID provided by chat
+            try:
+                session_id = turn_context.activity.get("chat_id", "0")
+            except Exception as e:
+                session_id = "0"
 
         result = await process_user_query(user_input, session_id)
         if isinstance(result, dict):
