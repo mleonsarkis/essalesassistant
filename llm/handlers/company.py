@@ -8,6 +8,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.memory.chat_message_histories import RedisChatMessageHistory
 from utils.loader import load_json
 from config.settings import OPENAI_API_KEY, REDIS_URL
+import re
 
 logging.basicConfig(level=logging.INFO)
 
@@ -46,6 +47,12 @@ Output the profile in a structured format.
 """
 )
 profile_chain = LLMChain(llm=llm, prompt=profile_prompt)
+
+
+def format_text(text):
+    """Escape Telegram MarkdownV2 special characters"""
+    special_chars = r'_*[]()~`>#+-=|{}.!'
+    return re.sub(r'([{}])'.format(re.escape(special_chars)), r'\\\1', text)
 
 def get_memory(session_id: str):
     chat_history = RedisChatMessageHistory(url=REDIS_URL, session_id=session_id)
@@ -115,7 +122,7 @@ class CompanyHandler:
                 return response
             else:
                 profile = await self.profile_chain.arun(company_name=candidate)
-                return profile
+                return format_text(profile)
         else:
             response = await conversation_chain.arun(user_input=user_input)
-            return response
+            return format_text(response)
