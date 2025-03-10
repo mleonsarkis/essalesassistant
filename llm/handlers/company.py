@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 known_companies = load_json("data/known_companies.json")
 logging.info(f"Loaded known companies: {known_companies}")
 
-llm = ChatOpenAI(model_name="gpt-4", openai_api_key=OPENAI_API_KEY, temperature=0.3)
+llm = ChatOpenAI(model_name="gpt-4-turbo", openai_api_key=OPENAI_API_KEY, temperature=0.3)
 
 extraction_prompt = PromptTemplate(
     input_variables=["user_input"],
