@@ -50,9 +50,8 @@ profile_chain = LLMChain(llm=llm, prompt=profile_prompt)
 
 
 def format_text(text):
-    """Escape Telegram MarkdownV2 special characters"""
-    special_chars = r'_*[]()~`>#+-=|{}.!'
-    return re.sub(r'([{}])'.format(re.escape(special_chars)), r'\\\1', text)
+    """Removes special characters that might cause parsing issues"""
+    return re.sub(r"[_*\[\]()~`>#+-=|{}.!]", "", text)
 
 def get_memory(session_id: str):
     chat_history = RedisChatMessageHistory(url=REDIS_URL, session_id=session_id)
