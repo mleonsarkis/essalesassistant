@@ -5,4 +5,4 @@ class OpportunityCommand(IntentCommand):
         self.handler = handler
 
     async def execute(self, user_input: str, session_id: str) -> str:
-        return await self.handler.handle(user_input)
+        return await self.handler.handle(user_input, session_id)

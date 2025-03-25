@@ -24,8 +24,8 @@ adapter_settings = BotFrameworkAdapterSettings(app_id, app_password)
 adapter = BotFrameworkAdapter(adapter_settings)
 
 llm = ChatOpenAI(
-    temperature=0.4,
-    model="gpt-4-turbo",
+    temperature=0,
+    model="gpt-4o",
     api_key=OPENAI_API_KEY
 )
 
