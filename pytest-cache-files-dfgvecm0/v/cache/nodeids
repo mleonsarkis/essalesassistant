@@ -1,0 +1,17 @@
+[
+  "tests/test_hooks.py::test_audit_log_hook_emits_structured_record",
+  "tests/test_hooks.py::test_session_enrichment_fills_user_message",
+  "tests/test_hooks.py::test_session_enrichment_leaves_existing_value",
+  "tests/test_registry.py::test_error_hook_retries_and_recovers",
+  "tests/test_registry.py::test_mcp_server_facade_list_and_call",
+  "tests/test_registry.py::test_metrics_hook_captures_counts",
+  "tests/test_registry.py::test_registry_invoke_basic",
+  "tests/test_registry.py::test_registry_manifest_shape",
+  "tests/test_registry.py::test_validation_hook_rejects_missing_required",
+  "tests/test_skills.py::test_fallback_skill",
+  "tests/test_skills.py::test_farewell_skill",
+  "tests/test_skills.py::test_greeting_skill_returns_intro",
+  "tests/test_skills.py::test_past_projects_hit",
+  "tests/test_skills.py::test_past_projects_miss",
+  "tests/test_skills.py::test_thanks_skill"
+]
